@@ -2,214 +2,900 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Personal Trademark Workbench</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Trademark Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;}
-body{display:flex;background:#f3f4f6;color:#111827;}
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #171d2e;
+    --border: #1e2640;
+    --accent: #c8a85a;
+    --accent2: #7eb8f7;
+    --accent3: #5df5a0;
+    --text: #e8eaf0;
+    --text-muted: #6b7494;
+    --text-dim: #3a4060;
+    --danger: #f57070;
+    --asia: #ff9a5c;
+    --europe: #7eb8f7;
+    --north-america: #c8a85a;
+    --south-america: #5df5a0;
+    --africa: #e07ef5;
+    --oceania: #f5d55e;
+    --antarctica: #a0c4ff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.sidebar{
-width:220px;
-background:#111827;
-color:white;
-height:100vh;
-padding:24px;
-}
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-.sidebar h2{margin-bottom:20px;font-size:18px;}
-.sidebar ul{list-style:none;}
-.sidebar li{margin:10px 0;cursor:pointer;opacity:0.85;font-size:14px;}
-.sidebar li:hover{opacity:1;}
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 50% at 20% 10%, rgba(126,184,247,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(200,168,90,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-.main{flex:1;padding:32px;}
+  /* Header */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,13,20,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 64px;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  .logo span {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.75rem;
+    display: block;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: -2px;
+  }
 
-.header h1{font-size:24px;margin-bottom:16px;}
+  .search-wrap {
+    flex: 1;
+    max-width: 400px;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+  #search {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px 8px 38px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #search:focus { border-color: var(--accent2); }
+  #search::placeholder { color: var(--text-muted); }
 
-.search-box input{
-width:100%;
-padding:10px;
-border-radius:6px;
-border:1px solid #d1d5db;
-margin-bottom:20px;
-}
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+  }
+  .view-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 3px;
+  }
+  .view-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    transition: all 0.15s;
+  }
+  .view-btn.active { background: var(--surface); color: var(--accent); }
+  .view-btn:hover:not(.active) { color: var(--text); }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:16px;
-}
+  .fav-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .fav-count:hover { border-color: var(--accent); color: var(--accent); }
+  .fav-count.active { border-color: var(--accent); color: var(--accent); background: rgba(200,168,90,0.08); }
 
-.card{
-background:white;
-padding:16px;
-border-radius:10px;
-border:1px solid #e5e7eb;
-position:relative;
-display:flex;
-flex-direction:column;
-}
+  /* Main layout */
+  .app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
 
-.card:hover{box-shadow:0 6px 16px rgba(0,0,0,0.08);}
+  /* Continent filter */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover { color: var(--text); border-color: #3a4060; }
+  .filter-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,168,90,0.08);
+  }
+  .filter-btn[data-continent="Asia"].active { border-color: var(--asia); color: var(--asia); background: rgba(255,154,92,0.08); }
+  .filter-btn[data-continent="Europe"].active { border-color: var(--europe); color: var(--europe); background: rgba(126,184,247,0.08); }
+  .filter-btn[data-continent="North America"].active { border-color: var(--north-america); color: var(--north-america); background: rgba(200,168,90,0.08); }
+  .filter-btn[data-continent="South America"].active { border-color: var(--south-america); color: var(--south-america); background: rgba(93,245,160,0.08); }
+  .filter-btn[data-continent="Africa"].active { border-color: var(--africa); color: var(--africa); background: rgba(224,126,245,0.08); }
+  .filter-btn[data-continent="Oceania"].active { border-color: var(--oceania); color: var(--oceania); background: rgba(245,213,94,0.08); }
 
-.favorite{
-position:absolute;
-right:12px;
-top:12px;
-cursor:pointer;
-font-size:18px;
-}
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+  }
+  .stat-divider {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+  }
 
-.note textarea{
-width:100%;
-padding:6px;
-font-size:12px;
-border-radius:6px;
-border:1px solid #d1d5db;
-resize:none;
-margin-top:8px;
-}
+  /* Grid view */
+  #grid-view { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  #map-view { display: none; }
 
-.stats{
-font-size:12px;
-color:#6b7280;
-margin-top:6px;
-}
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.3s ease backwards;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--continent-color, var(--accent));
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+  .card:hover { border-color: #2e3650; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .card:hover::before { opacity: 1; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .card-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .icon-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-dim);
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { color: var(--text-muted); background: var(--surface2); }
+  .icon-btn.fav-btn.active { color: var(--accent); }
+  .icon-btn.fav-btn:hover { color: var(--accent); }
+  .icon-btn.copy-btn:hover { color: var(--accent2); }
+  .icon-btn.note-btn:hover { color: var(--accent3); }
+  .icon-btn.note-btn.has-note { color: var(--accent3); }
+
+  .continent-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.67rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid;
+    margin-bottom: 0.75rem;
+  }
+  .continent-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .card-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent2);
+    font-size: 0.82rem;
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    transition: color 0.15s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card-link:hover { color: #aed4ff; }
+
+  /* Notes section */
+  .note-section {
+    margin-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+    display: none;
+  }
+  .note-section.open { display: block; }
+  .note-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    resize: vertical;
+    min-height: 60px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .note-textarea:focus { border-color: var(--accent3); }
+  .note-textarea::placeholder { color: var(--text-dim); }
+
+  .deadline-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0.5rem;
+  }
+  .deadline-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .deadline-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    outline: none;
+    flex: 1;
+    transition: border-color 0.15s;
+    color-scheme: dark;
+  }
+  .deadline-input:focus { border-color: var(--accent); }
+
+  .deadline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.67rem;
+    margin-top: 0.5rem;
+  }
+  .deadline-badge.soon { background: rgba(245,213,94,0.12); color: var(--oceania); border: 1px solid rgba(245,213,94,0.3); }
+  .deadline-badge.overdue { background: rgba(245,112,112,0.12); color: var(--danger); border: 1px solid rgba(245,112,112,0.3); }
+  .deadline-badge.ok { background: rgba(93,245,160,0.08); color: var(--accent3); border: 1px solid rgba(93,245,160,0.2); }
+
+  /* Map view */
+  #map-view {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    min-height: 500px;
+  }
+  .map-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+  .map-regions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+  .map-region {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .map-region:hover { border-color: var(--accent); }
+  .map-region-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .map-region-offices {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+  .map-region-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .map-region-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.8rem;
+  }
+  .map-region-item a {
+    color: var(--accent2);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+  }
+  .map-region-item a:hover { text-decoration: underline; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Empty */
+  .empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+  }
+
+  /* Results count */
+  .results-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .header-inner { flex-wrap: wrap; height: auto; padding: 1rem 0; gap: 0.75rem; }
+    .app { padding: 1rem; }
+    .stats-bar { gap: 1rem; }
+  }
 </style>
 </head>
-
 <body>
 
-<div class="sidebar">
-<h2>Continents</h2>
-<ul>
-<li onclick="filterRegion('all')">All</li>
-<li onclick="filterRegion('asia')">Asia</li>
-<li onclick="filterRegion('europe')">Europe</li>
-<li onclick="filterRegion('northamerica')">North America</li>
-<li onclick="filterRegion('southamerica')">South America</li>
-<li onclick="filterRegion('africa')">Africa</li>
-<li onclick="filterRegion('oceania')">Oceania</li>
-</ul>
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      Trademark Atlas
+      <span>Global IP Intelligence</span>
+    </div>
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search" placeholder="Search countries or offices…">
+    </div>
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="Grid view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        </button>
+        <button class="view-btn" id="map-btn" onclick="setView('map')" title="Region view">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </button>
+      </div>
+      <button class="fav-count" id="fav-toggle" onclick="toggleFavFilter()">
+        ★ Favorites <span id="fav-num">0</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <div class="filters" id="filters"></div>
+
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-label">Total Offices</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-value" id="stat-shown">0</div>
+      <div class="stat-label">Showing</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-value" id="stat-regions">0</div>
+      <div class="stat-label">Regions</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-value" id="stat-notes">0</div>
+      <div class="stat-label">Active Notes</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-value" id="stat-deadlines">0</div>
+      <div class="stat-label">Deadlines Set</div>
+    </div>
+  </div>
+
+  <div class="results-count" id="results-label"></div>
+
+  <div id="grid-view"></div>
+  <div id="map-view"></div>
 </div>
 
-<div class="main">
+<div class="toast" id="toast"></div>
 
-<div class="header">
-<h1>Personal Trademark Workbench</h1>
-<div class="search-box">
-<input type="text" id="searchInput" placeholder="Search country or office...">
-</div>
-</div>
-
-<div class="grid" id="cardContainer">
-
-<!-- Asia -->
 <script>
-const offices = [
-{id:"cnipa",name:"China – CNIPA",url:"https://sbj.cnipa.gov.cn/",region:"asia"},
-{id:"hk",name:"Hong Kong – IPD",url:"https://esearch.ipd.gov.hk/",region:"asia"},
-{id:"tipo",name:"Taiwan – TIPO",url:"https://tiponet.tipo.gov.tw/",region:"asia"},
-{id:"macao",name:"Macao – DSEDT",url:"https://www.dsedt.gov.mo/",region:"asia"},
-{id:"jpo",name:"Japan – JPO",url:"https://www.j-platpat.inpit.go.jp/",region:"asia"},
-{id:"korea",name:"Korea – KIPRIS",url:"https://www.kipris.or.kr/",region:"asia"},
-{id:"india",name:"India – IP Office",url:"https://ipindia.gov.in/",region:"asia"},
-{id:"singapore",name:"Singapore – IPOS",url:"https://tmsearch.ipos.gov.sg/",region:"asia"},
-
-{id:"euipo",name:"European Union – EUIPO",url:"https://euipo.europa.eu/",region:"europe"},
-{id:"ukipo",name:"United Kingdom – UK IPO",url:"https://www.gov.uk/search-for-trademark",region:"europe"},
-{id:"russia",name:"Russia – Rospatent",url:"https://www.fips.ru/",region:"europe"},
-
-{id:"uspto",name:"United States – USPTO",url:"https://tmsearch.uspto.gov/",region:"northamerica"},
-{id:"canada",name:"Canada – CIPO",url:"https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en",region:"northamerica"},
-
-{id:"brazil",name:"Brazil – INPI",url:"https://www.gov.br/inpi/",region:"southamerica"},
-{id:"argentina",name:"Argentina – INPI",url:"https://www.argentina.gob.ar/inpi",region:"southamerica"},
-
-{id:"southafrica",name:"South Africa – CIPC",url:"https://www.cipc.co.za/",region:"africa"},
-
-{id:"australia",name:"Australia – IP Australia",url:"https://search.ipaustralia.gov.au/",region:"oceania"}
+const OFFICES = [
+  // Asia
+  { id: 'cn', name: 'China', office: 'CNIPA', continent: 'Asia', url: 'https://sbj.cnipa.gov.cn/', flag: '🇨🇳' },
+  { id: 'hk', name: 'Hong Kong', office: 'IPD', continent: 'Asia', url: 'https://esearch.ipd.gov.hk/', flag: '🇭🇰' },
+  { id: 'tw', name: 'Taiwan', office: 'TIPO', continent: 'Asia', url: 'https://tiponet.tipo.gov.tw/', flag: '🇹🇼' },
+  { id: 'mo', name: 'Macao', office: 'DSEDT', continent: 'Asia', url: 'https://www.dsedt.gov.mo/', flag: '🇲🇴' },
+  { id: 'jp', name: 'Japan', office: 'JPO', continent: 'Asia', url: 'https://www.j-platpat.inpit.go.jp/', flag: '🇯🇵' },
+  { id: 'kr', name: 'Korea', office: 'KIPRIS', continent: 'Asia', url: 'https://www.kipris.or.kr/', flag: '🇰🇷' },
+  { id: 'in', name: 'India', office: 'IP India', continent: 'Asia', url: 'https://ipindia.gov.in/', flag: '🇮🇳' },
+  { id: 'sg', name: 'Singapore', office: 'IPOS', continent: 'Asia', url: 'https://tmsearch.ipos.gov.sg/', flag: '🇸🇬' },
+  { id: 'th', name: 'Thailand', office: 'DIP', continent: 'Asia', url: 'https://www.ipthailand.go.th/', flag: '🇹🇭' },
+  { id: 'vn', name: 'Vietnam', office: 'NOIP', continent: 'Asia', url: 'https://iplib.noip.gov.vn/', flag: '🇻🇳' },
+  { id: 'my', name: 'Malaysia', office: 'MyIPO', continent: 'Asia', url: 'https://www.myipo.gov.my/', flag: '🇲🇾' },
+  { id: 'id', name: 'Indonesia', office: 'DGIP', continent: 'Asia', url: 'https://www.dgip.go.id/', flag: '🇮🇩' },
+  { id: 'ph', name: 'Philippines', office: 'IPOPHL', continent: 'Asia', url: 'https://www.ipophil.gov.ph/', flag: '🇵🇭' },
+  { id: 'pk', name: 'Pakistan', office: 'IPO', continent: 'Asia', url: 'https://www.ipo.gov.pk/', flag: '🇵🇰' },
+  { id: 'ae', name: 'UAE', office: 'MOESAT', continent: 'Asia', url: 'https://www.moesat.gov.ae/', flag: '🇦🇪' },
+  // Europe
+  { id: 'eu', name: 'European Union', office: 'EUIPO', continent: 'Europe', url: 'https://euipo.europa.eu/', flag: '🇪🇺' },
+  { id: 'gb', name: 'United Kingdom', office: 'UK IPO', continent: 'Europe', url: 'https://www.gov.uk/search-for-trademark', flag: '🇬🇧' },
+  { id: 'ru', name: 'Russia', office: 'Rospatent', continent: 'Europe', url: 'https://www.fips.ru/', flag: '🇷🇺' },
+  { id: 'de', name: 'Germany', office: 'DPMA', continent: 'Europe', url: 'https://www.dpma.de/', flag: '🇩🇪' },
+  { id: 'fr', name: 'France', office: 'INPI', continent: 'Europe', url: 'https://www.inpi.fr/', flag: '🇫🇷' },
+  { id: 'it', name: 'Italy', office: 'UIBM', continent: 'Europe', url: 'https://www.uibm.gov.it/', flag: '🇮🇹' },
+  { id: 'es', name: 'Spain', office: 'OEPM', continent: 'Europe', url: 'https://www.oepm.es/', flag: '🇪🇸' },
+  { id: 'ch', name: 'Switzerland', office: 'IGE/IPI', continent: 'Europe', url: 'https://www.ige.ch/', flag: '🇨🇭' },
+  { id: 'tr', name: 'Turkey', office: 'TÜRKPATENT', continent: 'Europe', url: 'https://www.turkpatent.gov.tr/', flag: '🇹🇷' },
+  { id: 'ua', name: 'Ukraine', office: 'UKRPATENT', continent: 'Europe', url: 'https://ukrpatent.org/', flag: '🇺🇦' },
+  { id: 'wipo', name: 'International', office: 'WIPO Madrid', continent: 'Europe', url: 'https://branddb.wipo.int/', flag: '🌐' },
+  // North America
+  { id: 'us', name: 'United States', office: 'USPTO', continent: 'North America', url: 'https://tmsearch.uspto.gov/', flag: '🇺🇸' },
+  { id: 'ca', name: 'Canada', office: 'CIPO', continent: 'North America', url: 'https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en', flag: '🇨🇦' },
+  { id: 'mx', name: 'Mexico', office: 'IMPI', continent: 'North America', url: 'https://www.gob.mx/impi', flag: '🇲🇽' },
+  // South America
+  { id: 'br', name: 'Brazil', office: 'INPI', continent: 'South America', url: 'https://www.gov.br/inpi/', flag: '🇧🇷' },
+  { id: 'ar', name: 'Argentina', office: 'INPI', continent: 'South America', url: 'https://www.argentina.gob.ar/inpi', flag: '🇦🇷' },
+  { id: 'co', name: 'Colombia', office: 'SIC', continent: 'South America', url: 'https://www.sic.gov.co/', flag: '🇨🇴' },
+  { id: 'cl', name: 'Chile', office: 'INAPI', continent: 'South America', url: 'https://www.inapi.cl/', flag: '🇨🇱' },
+  // Africa
+  { id: 'za', name: 'South Africa', office: 'CIPC', continent: 'Africa', url: 'https://www.cipc.co.za/', flag: '🇿🇦' },
+  { id: 'ng', name: 'Nigeria', office: 'TRADEMARKS', continent: 'Africa', url: 'https://trademarks.justice.gov.ng/', flag: '🇳🇬' },
+  { id: 'ke', name: 'Kenya', office: 'KEIPO', continent: 'Africa', url: 'https://www.keipo.go.ke/', flag: '🇰🇪' },
+  { id: 'eg', name: 'Egypt', office: 'EGYPO', continent: 'Africa', url: 'https://egypo.gov.eg/', flag: '🇪🇬' },
+  // Oceania
+  { id: 'au', name: 'Australia', office: 'IP Australia', continent: 'Oceania', url: 'https://search.ipaustralia.gov.au/', flag: '🇦🇺' },
+  { id: 'nz', name: 'New Zealand', office: 'IPONZ', continent: 'Oceania', url: 'https://www.iponz.govt.nz/', flag: '🇳🇿' },
 ];
+
+const CONTINENT_COLORS = {
+  'Asia': 'var(--asia)',
+  'Europe': 'var(--europe)',
+  'North America': 'var(--north-america)',
+  'South America': 'var(--south-america)',
+  'Africa': 'var(--africa)',
+  'Oceania': 'var(--oceania)',
+};
+
+// State
+let state = {
+  filter: 'All',
+  search: '',
+  favOnly: false,
+  favs: new Set(),
+  notes: {},
+  deadlines: {},
+  openNotes: new Set(),
+  view: 'grid',
+};
+
+// Load from localStorage
+try {
+  const saved = JSON.parse(localStorage.getItem('tm_atlas') || '{}');
+  if (saved.favs) state.favs = new Set(saved.favs);
+  if (saved.notes) state.notes = saved.notes;
+  if (saved.deadlines) state.deadlines = saved.deadlines;
+} catch(e) {}
+
+function save() {
+  try {
+    localStorage.setItem('tm_atlas', JSON.stringify({
+      favs: [...state.favs],
+      notes: state.notes,
+      deadlines: state.deadlines,
+    }));
+  } catch(e) {}
+}
+
+function setView(v) {
+  state.view = v;
+  document.getElementById('grid-btn').classList.toggle('active', v === 'grid');
+  document.getElementById('map-btn').classList.toggle('active', v === 'map');
+  document.getElementById('grid-view').style.display = v === 'grid' ? 'grid' : 'none';
+  document.getElementById('map-view').style.display = v === 'map' ? 'block' : 'none';
+  if (v === 'map') renderMap();
+}
+
+function toggleFavFilter() {
+  state.favOnly = !state.favOnly;
+  document.getElementById('fav-toggle').classList.toggle('active', state.favOnly);
+  render();
+}
+
+// Filters
+const continents = ['All', ...new Set(OFFICES.map(o => o.continent))];
+function buildFilters() {
+  const el = document.getElementById('filters');
+  el.innerHTML = continents.map(c => `
+    <button class="filter-btn${c === state.filter ? ' active' : ''}" data-continent="${c}" onclick="setFilter('${c}')">${c}</button>
+  `).join('');
+}
+
+function setFilter(c) {
+  state.filter = c;
+  buildFilters();
+  render();
+}
+
+function getFiltered() {
+  return OFFICES.filter(o => {
+    if (state.favOnly && !state.favs.has(o.id)) return false;
+    if (state.filter !== 'All' && o.continent !== state.filter) return false;
+    const q = state.search.toLowerCase();
+    if (q && !o.name.toLowerCase().includes(q) && !o.office.toLowerCase().includes(q) && !o.continent.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function getDeadlineStatus(id) {
+  const d = state.deadlines[id];
+  if (!d) return null;
+  const date = new Date(d);
+  const now = new Date();
+  const diff = (date - now) / (1000 * 60 * 60 * 24);
+  if (diff < 0) return 'overdue';
+  if (diff < 14) return 'soon';
+  return 'ok';
+}
+
+function getDeadlineLabel(id) {
+  const d = state.deadlines[id];
+  if (!d) return '';
+  const date = new Date(d);
+  const now = new Date();
+  const diff = Math.round((date - now) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return `${Math.abs(diff)}d overdue`;
+  if (diff === 0) return 'Due today';
+  return `${diff}d away`;
+}
+
+function render() {
+  const filtered = getFiltered();
+  updateStats(filtered);
+
+  const label = document.getElementById('results-label');
+  label.textContent = filtered.length === OFFICES.length
+    ? `All ${OFFICES.length} offices`
+    : `${filtered.length} of ${OFFICES.length} offices`;
+
+  const grid = document.getElementById('grid-view');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty">No offices match your search.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((o, i) => {
+    const color = CONTINENT_COLORS[o.continent] || 'var(--accent)';
+    const isFav = state.favs.has(o.id);
+    const note = state.notes[o.id] || '';
+    const deadline = state.deadlines[o.id] || '';
+    const noteOpen = state.openNotes.has(o.id);
+    const dlStatus = getDeadlineStatus(o.id);
+    const dlLabel = getDeadlineLabel(o.id);
+    const urlDisplay = o.url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+    return `
+    <div class="card" style="--continent-color:${color}; animation-delay:${i * 0.03}s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">${o.flag} ${o.name}</div>
+          <div class="card-code">${o.office}</div>
+        </div>
+        <div class="card-actions">
+          <button class="icon-btn note-btn${note ? ' has-note' : ''}" title="Notes & deadline" onclick="toggleNote('${o.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </button>
+          <button class="icon-btn copy-btn" title="Copy URL" onclick="copyUrl('${o.url}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <button class="icon-btn fav-btn${isFav ? ' active' : ''}" title="${isFav ? 'Unfavorite' : 'Favorite'}" onclick="toggleFav('${o.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="continent-badge" style="color:${color}; border-color:${color}40;">
+        <span class="continent-dot"></span>${o.continent}
+      </div>
+
+      ${dlStatus ? `<div class="deadline-badge ${dlStatus}">⏰ ${dlLabel}</div>` : ''}
+
+      <a class="card-link" href="${o.url}" target="_blank" rel="noopener">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        ${urlDisplay}
+      </a>
+
+      <div class="note-section${noteOpen ? ' open' : ''}" id="note-${o.id}">
+        <textarea class="note-textarea" placeholder="Add notes about this office…" 
+          oninput="saveNote('${o.id}', this.value)">${note}</textarea>
+        <div class="deadline-row">
+          <span class="deadline-label">Deadline</span>
+          <input type="date" class="deadline-input" value="${deadline}" 
+            onchange="saveDeadline('${o.id}', this.value)" />
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMap() {
+  const byContinent = {};
+  OFFICES.forEach(o => {
+    if (!byContinent[o.continent]) byContinent[o.continent] = [];
+    byContinent[o.continent].push(o);
+  });
+
+  const el = document.getElementById('map-view');
+  el.innerHTML = `<div class="map-title">Browse by Region</div><div class="map-regions">` +
+    Object.entries(byContinent).map(([continent, offices]) => {
+      const color = CONTINENT_COLORS[continent] || 'var(--accent)';
+      return `
+      <div class="map-region" style="border-top: 2px solid ${color}">
+        <div class="map-region-name" style="color:${color}">${continent}</div>
+        <div class="map-region-offices">${offices.length} offices</div>
+        <div class="map-region-list">
+          ${offices.map(o => `
+            <div class="map-region-item">
+              <span>${o.flag} ${o.name}</span>
+              <a href="${o.url}" target="_blank" rel="noopener">${o.office} ↗</a>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function toggleFav(id) {
+  if (state.favs.has(id)) state.favs.delete(id);
+  else state.favs.add(id);
+  save();
+  updateFavCount();
+  render();
+}
+
+function toggleNote(id) {
+  if (state.openNotes.has(id)) state.openNotes.delete(id);
+  else state.openNotes.add(id);
+  // Toggle the DOM element directly for performance
+  const el = document.getElementById(`note-${id}`);
+  if (el) el.classList.toggle('open', state.openNotes.has(id));
+}
+
+function saveNote(id, val) {
+  if (val.trim()) state.notes[id] = val;
+  else delete state.notes[id];
+  save();
+  updateStats(getFiltered());
+}
+
+function saveDeadline(id, val) {
+  if (val) state.deadlines[id] = val;
+  else delete state.deadlines[id];
+  save();
+  updateStats(getFiltered());
+  render(); // re-render to update badge
+}
+
+function copyUrl(url) {
+  navigator.clipboard.writeText(url).then(() => showToast('URL copied!'));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function updateFavCount() {
+  document.getElementById('fav-num').textContent = state.favs.size;
+}
+
+function updateStats(filtered) {
+  document.getElementById('stat-total').textContent = OFFICES.length;
+  document.getElementById('stat-shown').textContent = filtered.length;
+  document.getElementById('stat-regions').textContent = new Set(filtered.map(o => o.continent)).size;
+  document.getElementById('stat-notes').textContent = Object.keys(state.notes).length;
+  document.getElementById('stat-deadlines').textContent = Object.keys(state.deadlines).length;
+  updateFavCount();
+}
+
+// Search
+document.getElementById('search').addEventListener('input', e => {
+  state.search = e.target.value;
+  render();
+});
+
+// Init
+buildFilters();
+render();
 </script>
-
-</div>
-</div>
-
-<script>
-const container=document.getElementById("cardContainer");
-
-offices.forEach(o=>{
-container.innerHTML+=`
-<div class="card" data-id="${o.id}" data-region="${o.region}" data-name="${o.name}">
-<div class="favorite" onclick="toggleFavorite('${o.id}')">☆</div>
-<a href="${o.url}" target="_blank" onclick="recordClick('${o.id}')">${o.name}</a>
-<div class="stats" id="stats-${o.id}"></div>
-<textarea placeholder="Add notes..." onkeyup="saveNote('${o.id}', this.value)"></textarea>
-</div>`;
-});
-
-const input=document.getElementById("searchInput");
-const cards=document.querySelectorAll(".card");
-
-input.addEventListener("keyup",function(){
-const filter=input.value.toLowerCase();
-cards.forEach(card=>{
-const name=card.getAttribute("data-name").toLowerCase();
-card.style.display=name.includes(filter)?"block":"none";
-});
-});
-
-function filterRegion(region){
-cards.forEach(card=>{
-card.style.display=(region==="all"||card.dataset.region===region)?"block":"none";
-});
-}
-
-function toggleFavorite(id){
-let favs=JSON.parse(localStorage.getItem("favorites")||"[]");
-if(favs.includes(id)){favs=favs.filter(f=>f!==id);}
-else{favs.push(id);}
-localStorage.setItem("favorites",JSON.stringify(favs));
-location.reload();
-}
-
-function recordClick(id){
-let clicks=JSON.parse(localStorage.getItem("clicks")||"{}");
-clicks[id]=(clicks[id]||0)+1;
-localStorage.setItem("clicks",JSON.stringify(clicks));
-}
-
-function saveNote(id,value){
-let notes=JSON.parse(localStorage.getItem("notes")||"{}");
-notes[id]=value;
-localStorage.setItem("notes",JSON.stringify(notes));
-}
-
-function loadData(){
-let favs=JSON.parse(localStorage.getItem("favorites")||"[]");
-let clicks=JSON.parse(localStorage.getItem("clicks")||"{}");
-let notes=JSON.parse(localStorage.getItem("notes")||"{}");
-
-cards.forEach(card=>{
-let id=card.dataset.id;
-
-if(favs.includes(id)){
-card.querySelector(".favorite").innerText="★";
-card.style.order="-1";
-}
-
-if(clicks[id]){
-document.getElementById("stats-"+id).innerText="Used "+clicks[id]+" times";
-}
-
-if(notes[id]){
-card.querySelector("textarea").value=notes[id];
-}
-});
-}
-
-loadData();
-</script>
-
 </body>
 </html>
