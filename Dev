@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Personal Trademark Workbench</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;}
+body{display:flex;background:#f3f4f6;color:#111827;}
+
+.sidebar{
+width:220px;
+background:#111827;
+color:white;
+height:100vh;
+padding:24px;
+}
+
+.sidebar h2{margin-bottom:20px;font-size:18px;}
+.sidebar ul{list-style:none;}
+.sidebar li{margin:10px 0;cursor:pointer;opacity:0.85;font-size:14px;}
+.sidebar li:hover{opacity:1;}
+
+.main{flex:1;padding:32px;}
+
+.header h1{font-size:24px;margin-bottom:16px;}
+
+.search-box input{
+width:100%;
+padding:10px;
+border-radius:6px;
+border:1px solid #d1d5db;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:16px;
+}
+
+.card{
+background:white;
+padding:16px;
+border-radius:10px;
+border:1px solid #e5e7eb;
+position:relative;
+display:flex;
+flex-direction:column;
+}
+
+.card:hover{box-shadow:0 6px 16px rgba(0,0,0,0.08);}
+
+.favorite{
+position:absolute;
+right:12px;
+top:12px;
+cursor:pointer;
+font-size:18px;
+}
+
+.note textarea{
+width:100%;
+padding:6px;
+font-size:12px;
+border-radius:6px;
+border:1px solid #d1d5db;
+resize:none;
+margin-top:8px;
+}
+
+.stats{
+font-size:12px;
+color:#6b7280;
+margin-top:6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<h2>Continents</h2>
+<ul>
+<li onclick="filterRegion('all')">All</li>
+<li onclick="filterRegion('asia')">Asia</li>
+<li onclick="filterRegion('europe')">Europe</li>
+<li onclick="filterRegion('northamerica')">North America</li>
+<li onclick="filterRegion('southamerica')">South America</li>
+<li onclick="filterRegion('africa')">Africa</li>
+<li onclick="filterRegion('oceania')">Oceania</li>
+</ul>
+</div>
+
+<div class="main">
+
+<div class="header">
+<h1>Personal Trademark Workbench</h1>
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Search country or office...">
+</div>
+</div>
+
+<div class="grid" id="cardContainer">
+
+<!-- Asia -->
+<script>
+const offices = [
+{id:"cnipa",name:"China – CNIPA",url:"https://sbj.cnipa.gov.cn/",region:"asia"},
+{id:"hk",name:"Hong Kong – IPD",url:"https://esearch.ipd.gov.hk/",region:"asia"},
+{id:"tipo",name:"Taiwan – TIPO",url:"https://tiponet.tipo.gov.tw/",region:"asia"},
+{id:"macao",name:"Macao – DSEDT",url:"https://www.dsedt.gov.mo/",region:"asia"},
+{id:"jpo",name:"Japan – JPO",url:"https://www.j-platpat.inpit.go.jp/",region:"asia"},
+{id:"korea",name:"Korea – KIPRIS",url:"https://www.kipris.or.kr/",region:"asia"},
+{id:"india",name:"India – IP Office",url:"https://ipindia.gov.in/",region:"asia"},
+{id:"singapore",name:"Singapore – IPOS",url:"https://tmsearch.ipos.gov.sg/",region:"asia"},
+
+{id:"euipo",name:"European Union – EUIPO",url:"https://euipo.europa.eu/",region:"europe"},
+{id:"ukipo",name:"United Kingdom – UK IPO",url:"https://www.gov.uk/search-for-trademark",region:"europe"},
+{id:"russia",name:"Russia – Rospatent",url:"https://www.fips.ru/",region:"europe"},
+
+{id:"uspto",name:"United States – USPTO",url:"https://tmsearch.uspto.gov/",region:"northamerica"},
+{id:"canada",name:"Canada – CIPO",url:"https://ised-isde.canada.ca/site/canadian-intellectual-property-office/en",region:"northamerica"},
+
+{id:"brazil",name:"Brazil – INPI",url:"https://www.gov.br/inpi/",region:"southamerica"},
+{id:"argentina",name:"Argentina – INPI",url:"https://www.argentina.gob.ar/inpi",region:"southamerica"},
+
+{id:"southafrica",name:"South Africa – CIPC",url:"https://www.cipc.co.za/",region:"africa"},
+
+{id:"australia",name:"Australia – IP Australia",url:"https://search.ipaustralia.gov.au/",region:"oceania"}
+];
+</script>
+
+</div>
+</div>
+
+<script>
+const container=document.getElementById("cardContainer");
+
+offices.forEach(o=>{
+container.innerHTML+=`
+<div class="card" data-id="${o.id}" data-region="${o.region}" data-name="${o.name}">
+<div class="favorite" onclick="toggleFavorite('${o.id}')">☆</div>
+<a href="${o.url}" target="_blank" onclick="recordClick('${o.id}')">${o.name}</a>
+<div class="stats" id="stats-${o.id}"></div>
+<textarea placeholder="Add notes..." onkeyup="saveNote('${o.id}', this.value)"></textarea>
+</div>`;
+});
+
+const input=document.getElementById("searchInput");
+const cards=document.querySelectorAll(".card");
+
+input.addEventListener("keyup",function(){
+const filter=input.value.toLowerCase();
+cards.forEach(card=>{
+const name=card.getAttribute("data-name").toLowerCase();
+card.style.display=name.includes(filter)?"block":"none";
+});
+});
+
+function filterRegion(region){
+cards.forEach(card=>{
+card.style.display=(region==="all"||card.dataset.region===region)?"block":"none";
+});
+}
+
+function toggleFavorite(id){
+let favs=JSON.parse(localStorage.getItem("favorites")||"[]");
+if(favs.includes(id)){favs=favs.filter(f=>f!==id);}
+else{favs.push(id);}
+localStorage.setItem("favorites",JSON.stringify(favs));
+location.reload();
+}
+
+function recordClick(id){
+let clicks=JSON.parse(localStorage.getItem("clicks")||"{}");
+clicks[id]=(clicks[id]||0)+1;
+localStorage.setItem("clicks",JSON.stringify(clicks));
+}
+
+function saveNote(id,value){
+let notes=JSON.parse(localStorage.getItem("notes")||"{}");
+notes[id]=value;
+localStorage.setItem("notes",JSON.stringify(notes));
+}
+
+function loadData(){
+let favs=JSON.parse(localStorage.getItem("favorites")||"[]");
+let clicks=JSON.parse(localStorage.getItem("clicks")||"{}");
+let notes=JSON.parse(localStorage.getItem("notes")||"{}");
+
+cards.forEach(card=>{
+let id=card.dataset.id;
+
+if(favs.includes(id)){
+card.querySelector(".favorite").innerText="★";
+card.style.order="-1";
+}
+
+if(clicks[id]){
+document.getElementById("stats-"+id).innerText="Used "+clicks[id]+" times";
+}
+
+if(notes[id]){
+card.querySelector("textarea").value=notes[id];
+}
+});
+}
+
+loadData();
+</script>
+
+</body>
+</html>
